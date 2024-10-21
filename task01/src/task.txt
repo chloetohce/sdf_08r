@@ -1,0 +1,16 @@
+Add the following products:
+
+Mouse
+    Desc: For click UI on screen
+    Category: Computer
+    Price: 99.0
+
+Keyboard
+    Desc: Device that allows alphanumerical inputs
+    Category: Computer
+    Price:235.5
+
+15.6 inch monitor
+    Desc: Extended display panel
+    Category: Computer
+    Price:157.5

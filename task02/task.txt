@@ -1,0 +1,2 @@
+Given a set of numbers, write an algorithm that generates distinct permutations of the numbers
+Save the permutations into a set. 
