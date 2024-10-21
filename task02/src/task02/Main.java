@@ -1,4 +1,4 @@
-package task02.src;
+package task02;
 
 import java.io.Console;
 import java.util.*;
@@ -26,10 +26,8 @@ public class Main {
         Console cons = System.console();
         String input = cons.readLine("Enter a string of numbers: ");
         String temp = input.replaceAll(" ", "");
-        Set<String> set = new HashSet<>();
-
-        set.addAll(generate(temp));
-        set.stream().forEach(System.out::println);
-        System.out.println("Total number of permutations: " + set.size());
+        Set<String> result = generate(temp);
+        result.stream().forEach(System.out::println);
+        System.out.println("Total number of permutations: " + result.size());
     }
 }
