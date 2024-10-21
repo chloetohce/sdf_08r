@@ -73,7 +73,7 @@ public class Mastermind {
             }
             tries++;
             Integer[] guessArr = Arrays.stream(guess.split(""))
-                .map(str -> Integer.parseInt(str))
+                .map(str -> Integer.valueOf(str))
                 .toArray(s -> new Integer[s]);
             
             //Check if there are any correct answers
