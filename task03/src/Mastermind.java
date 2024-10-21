@@ -11,11 +11,9 @@ public class Mastermind {
     private boolean isWon;
     
     public Mastermind() {
-        
-        
         for (int i = 0; i < NUM_OPTIONS; i++) {
             Random rand = new SecureRandom();
-            answer[i] = rand.nextInt(1,6);
+            answer[i] = rand.nextInt(1,7);
         }
         tries = 0;
         isWon = false;
@@ -41,8 +39,10 @@ public class Mastermind {
         // Check for correct positions first (should take priority)
         for (int i = 0; i < NUM_OPTIONS; i++) {
             int guess = guessArr[i];
-            if (guess == answerList.get(i))
-                answerList.set(i, 0);
+            if (guess == answer[i]) {
+                answerList.remove(answerList.indexOf(guess));
+                guessArr[i] = 0;
+            }
         }
 
         // Check if there are any mismatch in positions. While iterating, replace each correct guess in answerList
@@ -54,6 +54,19 @@ public class Mastermind {
                 answerList.set(index, 0);
             }
         }
+
+        // for (int i = 0; i < NUM_OPTIONS; i++) {
+        //     int guess = guessArr[i];
+        //     if (guess == answerList.get(i)) {
+        //         answerList.set(i, 0);
+        //         continue;
+        //     }
+        //     if (answerList.contains(guess)) {
+        //         num++;
+        //         int index = answerList.indexOf(guess);
+        //         answerList.set(index, 0);
+        //     }
+        // }
         return num;
     }
 
