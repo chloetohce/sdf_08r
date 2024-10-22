@@ -51,7 +51,7 @@ public class Mastermind {
                 result.set(i, "?");
             }
         }
-        return result.stream().reduce("", (x, y) -> x + " " + y);
+        return result.stream().reduce("", (x, y) -> x + y + " ");
     }
 
     private boolean checkWin(String result) {
@@ -72,8 +72,11 @@ public class Mastermind {
 
     public void play() {
         System.out.println("Enter your guess as a single input (e.g. 1234). You'll have 10 tries to guess the correct combination. ");
-        System.out.println("Valid input: " + VALID_INPUT);
+        System.out.println("Valid input includes any of the following numbers: " + VALID_INPUT);
         System.out.println("There are " + NUM_OPTIONS + " blanks to guess.");
+        System.out.println();
+
+        Intelligence ai = new Intelligence(db, VALID_INPUT, NUM_OPTIONS);
 
         Console cons = System.console();
         while (!isWon && tries <= 10) {
@@ -94,6 +97,8 @@ public class Mastermind {
             String result = checkPlacement(guessArr);
 
             writeToFile(guess, result);
+
+            System.out.println("Suggested guess: " + ai.suggestGuess());
 
             if (checkWin(result)) {
                 isWon = true;
@@ -134,6 +139,7 @@ public class Mastermind {
             if (input.equals("play")) {
                 System.out.println("Please enter a file to save your data. \nPlease note that all data within the save file will be overwritten.");
                 input = cons.readLine("Enter a file name: ");
+                System.out.println();
                 String f = "data" + File.separator + input;
                 Mastermind m = new Mastermind(f);
                 m.play();
