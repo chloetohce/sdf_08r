@@ -1,5 +1,5 @@
 
-import java.io.Console;
+import java.io.*;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -9,70 +9,71 @@ public class Mastermind {
     private final int[] answer = new int[NUM_OPTIONS];
     private int tries;
     private boolean isWon;
+    private final File db;
     
-    public Mastermind() {
+    public Mastermind(String db) {
         for (int i = 0; i < NUM_OPTIONS; i++) {
             Random rand = new SecureRandom();
-            answer[i] = rand.nextInt(1,7);
+            answer[i] = rand.nextInt(1,VALID_INPUT.length() + 1);
         }
         tries = 0;
         isWon = false;
-    }
-
-    private int checkCorrectPlacement(Integer[] guessArr) {
-        int num = 0;
-        for (int i = 0; i < NUM_OPTIONS; i++) {
-            if (guessArr[i] == answer[i]) {
-                num++;
-            }
+        try {
+            File f = new File(db);
+            f.delete();
+            f.createNewFile();
+        } catch (IOException e) {
+            System.err.println("Error with file handling.");
+            System.exit(-1);
         }
-        return num;
+        this.db = new File(db);
     }
 
-    private int checkWrongPlacement(Integer[] guessArr) {
-        int num = 0;
+
+    private String checkPlacement(Integer[] guessArr) {
+        List<String> result = new ArrayList<>();
         List<Integer> answerList = new ArrayList<>();
         for (int i : answer) {
             answerList.add(i);
         }
-
-        // Check for correct positions first (should take priority)
         for (int i = 0; i < NUM_OPTIONS; i++) {
-            int guess = guessArr[i];
-            if (guess == answer[i]) {
-                answerList.remove(answerList.indexOf(guess));
-                guessArr[i] = 0;
+            if (guessArr[i] == answer[i]) {
+                result.add(guessArr[i].toString());
+                answerList.set(i, 0); // set to 0 to mean that answer option has been matched
+            } else {
+                result.add("_");
             }
         }
 
-        // Check if there are any mismatch in positions. While iterating, replace each correct guess in answerList
-        for (int i = 0; i < NUM_OPTIONS; i++) {
-            int guess = guessArr[i];
-            if (answerList.contains(guess)) {
-                num++;
-                int index = answerList.indexOf(guess);
-                answerList.set(index, 0);
+        for (int i = 0; i < result.size(); i++) {
+            if (answerList.contains(guessArr[i]) && result.get(i).equals("_")) {
+                // if there is a num that is in the wrong place and if there is still the number left in the answer (list)
+                result.set(i, "?");
             }
         }
+        return result.stream().reduce("", (x, y) -> x + " " + y);
+    }
 
-        // for (int i = 0; i < NUM_OPTIONS; i++) {
-        //     int guess = guessArr[i];
-        //     if (guess == answerList.get(i)) {
-        //         answerList.set(i, 0);
-        //         continue;
-        //     }
-        //     if (answerList.contains(guess)) {
-        //         num++;
-        //         int index = answerList.indexOf(guess);
-        //         answerList.set(index, 0);
-        //     }
-        // }
-        return num;
+    private boolean checkWin(String result) {
+        return !(result.contains("_") || result.contains("?"));
+    }
+
+    private void writeToFile(String guess, String result) {
+        try (FileWriter fw = new FileWriter(db,true); BufferedWriter bw = new BufferedWriter(fw)) {
+            bw.append(guess + "," + result);
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            System.err.println("Error writing to file. Please restart.");
+
+        }
     }
 
     public void play() {
         System.out.println("Enter your guess as a single input (e.g. 1234). You'll have 10 tries to guess the correct combination. ");
-        System.out.println("Valid input: 1 - 6");
+        System.out.println("Valid input: " + VALID_INPUT);
+        System.out.println("There are " + NUM_OPTIONS + " blanks to guess.");
 
         Console cons = System.console();
         while (!isWon && tries <= 10) {
@@ -89,18 +90,17 @@ public class Mastermind {
                 .map(str -> Integer.valueOf(str))
                 .toArray(s -> new Integer[s]);
             
-            //Check if there are any correct answers
-            int correctPlace = checkCorrectPlacement(guessArr);
-            int wrongPlacement = checkWrongPlacement(guessArr);
+            // Check which position is correct or wrongly placed
+            String result = checkPlacement(guessArr);
 
-            if (correctPlace == NUM_OPTIONS) {
+            writeToFile(guess, result);
+
+            if (checkWin(result)) {
                 isWon = true;
                 continue;
             }
 
-            System.out.println();
-            System.out.println("No. of correct placements: " + correctPlace);
-            System.out.println("No. of correct num but wrong position: " + wrongPlacement);
+            System.out.println("Result: " + result);
             System.out.println();
         }
 
@@ -125,14 +125,17 @@ public class Mastermind {
         System.out.println();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
         Console cons = System.console();
         String input = "";
         while (!input.equals("quit")) {
             printMenu();
             input = cons.readLine("> ");
             if (input.equals("play")) {
-                Mastermind m = new Mastermind();
+                System.out.println("Please enter a file to save your data. \nPlease note that all data within the save file will be overwritten.");
+                input = cons.readLine("Enter a file name: ");
+                String f = "data" + File.separator + input;
+                Mastermind m = new Mastermind(f);
                 m.play();
             } else if (!input.equals("quit")) {
                 System.err.println("Unrecognised command. ");
