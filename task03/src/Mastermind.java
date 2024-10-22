@@ -9,9 +9,10 @@ public class Mastermind {
     private final int[] answer = new int[NUM_OPTIONS];
     private int tries;
     private boolean isWon;
+    private final boolean provideHelp;
     private final File db;
     
-    public Mastermind(String db) {
+    public Mastermind(String db, boolean help) {
         for (int i = 0; i < NUM_OPTIONS; i++) {
             Random rand = new SecureRandom();
             answer[i] = rand.nextInt(1,VALID_INPUT.length() + 1);
@@ -27,6 +28,7 @@ public class Mastermind {
             System.exit(-1);
         }
         this.db = new File(db);
+        provideHelp = help;
     }
 
 
@@ -97,8 +99,10 @@ public class Mastermind {
             String result = checkPlacement(guessArr);
 
             writeToFile(guess, result);
-
-            System.out.println("Suggested guess: " + ai.suggestGuess());
+            
+            // Check if user wants help before providing help
+            if (provideHelp)
+                System.out.println("Suggested guess: " + ai.suggestGuess());
 
             if (checkWin(result)) {
                 isWon = true;
@@ -139,9 +143,13 @@ public class Mastermind {
             if (input.equals("play")) {
                 System.out.println("Please enter a file to save your data. \nPlease note that all data within the save file will be overwritten.");
                 input = cons.readLine("Enter a file name: ");
-                System.out.println();
                 String f = "data" + File.separator + input;
-                Mastermind m = new Mastermind(f);
+                System.out.println("Would you like some help while playing? (Y/N)");
+                input = cons.readLine("> ");
+                System.out.println();
+                Mastermind m = new Mastermind(f, true);
+                if (input.equals("N"))
+                    m = new Mastermind(f,false);
                 m.play();
             } else if (!input.equals("quit")) {
                 System.err.println("Unrecognised command. ");
